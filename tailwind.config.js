@@ -1,0 +1,25 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+    content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.vue",
+    // Tambahkan path ke Flowbite jika perlu
+    "./node_modules/flowbite/**/*.js"
+    ],
+
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+        },
+    },
+
+    plugins: [
+    require('flowbite/plugin') // Aktifkan plugin Flowbite
+    ]
+};
