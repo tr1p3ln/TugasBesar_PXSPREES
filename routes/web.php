@@ -88,7 +88,7 @@ Route::middleware(['auth', 'verified', 'is_user'])->group(function () {
 
     Route::get('/user/merchant', function () {
         return view('user.merchant');
-    })->name('merchant'); // Consider naming 'user.merchant' for consistency
+    })->name('merchant'); // Consider naming 'user.merchant' for consistency    
 
 
     // Route ini akan menampilkan halaman pembayaran berdasarkan booking
