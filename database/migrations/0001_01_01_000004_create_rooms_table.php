@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('console_type', ['Nintendo', 'Playstation', 'VIP']);
             $table->decimal('price_per_hour', 10, 2);
             $table->text('description');
-            $table->string('image_url', 255);
+            $table->enum('status', ['Available', 'Booked', 'Maintenance', 'Disabled']) ->default('Available');
             $table->timestamps();
         });
     }

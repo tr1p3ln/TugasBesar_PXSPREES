@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained();
             $table->foreignId('room_id')->constrained();
-            $table->foreignId('user_voucher_id')->nullable()->constrained(); // <- Ubah ke plural
+            $table->foreignId('user_voucher_id')->nullable()->constrained('user_vouchers');
             $table->dateTime('start_time');
             $table->integer('duration_hour');
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->decimal('total_price', 10, 2);
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps(); 
         });
     }
 

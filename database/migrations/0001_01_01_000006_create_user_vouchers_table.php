@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_vouchers', function (Blueprint $table) {  // <- Ubah ke plural
+        Schema::create('user_vouchers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained();
-            $table->foreignId('voucher_id')->constrained();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Menambahkan onDelete('cascade')
+            $table->foreignId('voucher_id')->constrained()->onDelete('cascade'); // Menambahkan onDelete('cascade')
             $table->timestamp('claimed_at')->useCurrent();
             $table->boolean('is_used')->default(false);
             $table->timestamps();
@@ -26,6 +26,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_voucher');
+        Schema::dropIfExists('user_vouchers'); 
     }
 };
+
