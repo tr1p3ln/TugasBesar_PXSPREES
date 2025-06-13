@@ -4,69 +4,133 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\VoucherController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsUser;
-use App\Http\Controllers\BookingController;
 use App\Http\Controllers\LogoutController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 
+// ==========================
 // Homepage untuk guest
+// ==========================
 Route::get('/', function () {
     return view('index');
 })->name('home');
 
 // Email Verification Routes
+// ==========================
+// Email Verification Routes
+// ==========================
+
+// Menampilkan halaman notifikasi verifikasi email
 Route::get('/email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
 
+// Proses verifikasi dari email link
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
 
+    // Redirect berdasarkan role setelah verifikasi berhasil
     if ($request->user()->role === 'admin') {
-        return redirect()->route('admin.home');
+        // INI PENTING: Pastikan ini memanggil 'admin.home'
+        return redirect()->route('admin.home'); 
     }
+
     return redirect()->route('user.home');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
+// Mengirim ulang email verifikasi
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('status', 'verification-link-sent');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 
-// Routes untuk Admin
-Route::middleware(['auth', 'verified', 'is_admin'])->group(function () {
-    Route::get('/admin/homepage', function () {
-        return view('admin.homepage');
-    })->name('admin.home');
+// URL: /admin/*, Nama: admin.*, Middleware: auth, verified, is_admin
+// ===========================================
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admin'])->group(function () {
 
-    Route::get('/bookingdata', function () {
-        return view('admin.bookingdata');
-    })->name('admin.bookingdata'); // Accessible as route('admin.bookingdata'), URL: /admin/bookingdata
+    // Admin Homepage
+    // URL: /admin/homepage, Nama: admin.home (INI ADALAH ROUTE UTAMA UNTUK HOMEPAGE ADMIN)
+    Route::get('/homepage', [AdminController::class, 'homepage'])->name('home'); //
 
-    Route::get('/historydata', function () {
-        return view('admin.historydata');
-    })->name('admin.historydata'); // Accessible as route('admin.historydata'), URL: /admin/historydata
+    // Export PDF
+    // URL: /admin/exportpdf, Nama: admin.exportpdf
+    Route::get('/exportpdf', [AdminController::class, 'exportPDF'])->name('exportpdf'); //
 
-    Route::get('/homepage', function () {
-        return view('admin.homepage');
-    })->name('admin.homepage');
+    // ==========================
+    // Admin Data (Manajemen Kamar/Ruangan)
+    // ==========================
+    // Menampilkan semua data kamar
+    // URL: /admin/keloladata, Nama: admin.keloladata
+    Route::get('/keloladata', [RoomController::class, 'view'])->name('keloladata');
+    // Menampilkan form tambah kamar
+    // URL: /admin/rooms/create, Nama: admin.rooms.create
+    Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create');
+    // Menyimpan data kamar baru (POST)
+    // URL: /admin/rooms/create, Nama: admin.rooms.store
+    Route::post('/rooms/create', [RoomController::class, 'store'])->name('rooms.store');
+    // Menampilkan form edit kamar
+    // URL: /admin/rooms/{id}/edit, Nama: admin.rooms.edit
+    Route::get('/rooms/{id}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    // Memperbarui data kamar (PUT/PATCH)
+    // URL: /admin/rooms/{id}, Nama: admin.rooms.update
+    Route::put('/rooms/{id}', [RoomController::class, 'update'])->name('rooms.update');
+    // Menghapus data kamar (DELETE)
+    // URL: /admin/rooms/{id}, Nama: admin.rooms.destroy
+    Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->name('rooms.destroy');
 
-    Route::get('/keloladata', function () {
-        return view('admin.keloladata');
-    })->name('admin.keloladata'); // Accessible as route('admin.keloladata'), URL: /admin/keloladata
+    // ==========================
+    // Admin Voucher
+    // ==========================
+    // Menampilkan semua data voucher
+    // URL: /admin/voucher, Nama: admin.voucher
+    // Route::get('/voucher', [VoucherController::class, 'view'])->name('voucher');
+    // // Menampilkan form tambah voucher
+    // // URL: /admin/vouchers/create, Nama: admin.vouchers.create
+    // Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create');
+    // // Menyimpan data voucher baru (POST)
+    // // URL: /admin/vouchers/create, Nama: admin.vouchers.store
+    // Route::post('/vouchers/create', [VoucherController::class, 'store'])->name('vouchers.store');
+    // // Menampilkan form edit voucher
+    // // URL: /admin/vouchers/{id}/edit, Nama: admin.vouchers.edit
+    // Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit');
+    // // Memperbarui data voucher (PUT/PATCH)
+    // // URL: /admin/vouchers/{id}, Nama: admin.vouchers.update
+    // Route::put('/vouchers/{id}', [VoucherController::class, 'update'])->name('vouchers.update');
+    // // Menghapus data voucher (DELETE)
+    // // URL: /admin/vouchers/{id}, Nama: admin.vouchers.destroy
+    // Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy'])->name('vouchers.destroy');
 
-    Route::get('/voucher', function () {
-        return view('admin.voucher');
-    })->name('admin.voucher'); // Accessible as route('admin.voucher'), URL: /admin/voucher
+    // ==========================
+    // Admin Booking Data
+    // ==========================
+    // Menampilkan data booking (ini dari BookingController::view, bukan AdminController::bookingData)
+    // URL: /admin/bookingdata, Nama: admin.bookingdata
+    Route::get('/bookingdata', [BookingController::class, 'view'])->name('bookingdata');
 
-    Route::get('/vouchercreate', function () {
-        return view('admin.vouchercreate');
-    })->name('admin.vouchercreate'); // Accessible as route('admin.vouchercreate'), URL: /admin/vouchercreate
+    // ==========================
+    // Admin Payment (History Data)
+    // ==========================
+    // Menampilkan data riwayat pembayaran (ini dari PaymentController::view, bukan AdminController::historydata)
+    // URL: /admin/historydata, Nama: admin.historydata
+    Route::get('/historydata', [PaymentController::class, 'view'])->name('historydata'); //
+
+    // Jika Anda memiliki route admin.payments.show (seperti yang terlihat di ProofUploaded.php)
+    // Anda perlu menambahkannya di sini.
+    // Contoh:
+    Route::get('/payments/{payment}/show', [App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show'); //
+    Route::post('/payments/{payment}/confirm', [App\Http\Controllers\Admin\PaymentController::class, 'confirm'])->name('payments.confirm'); //
 });
+
+
+
 
 
 // Routes untuk User Biasa
