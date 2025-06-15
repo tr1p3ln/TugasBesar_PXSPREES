@@ -1,38 +1,34 @@
-<div class="sidebar fixed top-0 left-0 w-48 h-screen bg-black pt-5 border-r border-gray-300">
-    <div class="flex justify-center mb-5"> <!-- Centering the logo -->
-        <div class="w-24 h-24"> <!-- Adjust size as needed -->
+<div class="sidebar fixed top-0 left-0 w-52 h-screen bg-gray-800 pt-5 border-r border-gray-700"> <!-- Changed background to bg-gray-800 -->
+    <div class="flex justify-center mb-5">
+        <div class="w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full shadow-lg"> <!-- Changed inner background -->
             <x-application-logo class="w-full h-full" />
         </div>
     </div>
 
-    {{-- Home --}}
-    <a href="{{ route('admin.home') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-home mr-2"></i> Home
-    </a>
+    <nav class="flex flex-col space-y-2">
+        {{-- Home --}}
+        <a href="{{ route('admin.home') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-home mr-2"></i> Home
+        </a>
 
-    {{-- Kelola Data --}}
-    <a href="{{ route('admin.keloladata') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-database mr-2"></i> Data
-    </a>
+        {{-- Kelola Data --}}
+        <a href="{{ route('admin.rooms.create') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-database mr-2"></i> Data
+        </a>
 
-    {{-- Booking Data --}}
-    <a href="{{ route('admin.bookingdata') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-list mr-2"></i> Booking
-    </a>
+        {{-- Booking Data --}}
+        <a href="{{ route('admin.bookingdata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-list mr-2"></i> Booking
+        </a>
 
-    {{-- History / Transaksi --}}
-    <a href="{{ route('admin.historydata') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-handshake mr-2"></i> Transaksi
-    </a>
+        {{-- History / Transaksi --}}
+        <a href="{{ route('admin.historydata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-handshake mr-2"></i> Transaksi
+        </a>
 
-    {{-- Voucher --}}
-    {{-- <a href="{{ route('admin.voucher') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-ticket mr-2"></i> Voucher
-    </a> --}}
-
-    {{-- Tambah Voucher --}}
-    {{-- <a href="{{ route('admin.vouchercreate') }}" class="sidebar-item block py-3 px-5 text-white font-medium hover:bg-gray-700">
-        <i class="fas fa-plus mr-2"></i> Tambah Voucher
-    </a> --}}
-
+        {{-- Voucher --}}
+        <a href="{{ route('admin.voucher') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-ticket mr-2"></i> Voucher
+        </a>
+    </nav>
 </div>

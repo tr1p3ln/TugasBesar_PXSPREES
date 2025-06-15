@@ -65,6 +65,7 @@
                 <img src="{{ asset('assets/picture/vip.png') }}" alt="VIP Room" class="w-24 md:w-32" />
             </div>
         </div>
+        
 
         <!-- Room section -->
         <div class="room">

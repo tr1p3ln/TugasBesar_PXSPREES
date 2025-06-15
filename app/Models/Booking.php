@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class Booking extends Model
 {
@@ -37,5 +38,15 @@ class Booking extends Model
     public function voucher(): BelongsTo
     {
         return $this->belongsTo(UserVoucher::class, 'user_voucher_id');
+    }
+
+    // public function payment(): HasOne
+    // {
+    //     return $this->hasOne(Payment::class);
+    // }
+
+    public function getEndTimeAttribute(): Carbon
+    {
+        return $this->start_time->copy()->addHours($this->duration_hour);
     }
 }

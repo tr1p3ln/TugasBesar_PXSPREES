@@ -26,21 +26,21 @@ class AdminController extends Controller
     }
 
     // Fungsi untuk export PDF
-    // public function exportPDF(Request $request)
-    // {
-    //     $filterDate = $request->input('filter_date');
+    public function exportPDF(Request $request)
+    {
+        $filterDate = $request->input('filter_date');
 
-    //     $payments = Payment::query();
+        $payments = Payment::query();
 
-    //     if ($filterDate) {
-    //         $payments->whereDate('created_at', $filterDate);
-    //     }
+        if ($filterDate) {
+            $payments->whereDate('created_at', $filterDate);
+        }
 
-    //     $payments = $payments->get();
+        $payments = $payments->get();
 
-    //     $pdf = Pdf::loadView('admin.exportpdf', compact('payments', 'filterDate'));
-    //     return $pdf->download('history-transaksi.pdf');
-    // }
+        $pdf = Pdf::loadView('admin.exportpdf', compact('payments', 'filterDate'));
+        return $pdf->download('history-transaksi.pdf');
+    }
     
     public function bookingData(Request $request)
     {

@@ -7,13 +7,21 @@
     </style>
 
     <div class="grid grid-cols-3 gap-4 mt-3">
-        <div class="stat-card bg-gray-800 p-4 rounded shadow text-white">TOTAL BOOKING</div>
-        <div class="stat-card bg-gray-800 p-4 rounded shadow text-white">KEUNTUNGAN</div>
-        <div class="stat-card bg-gray-800 p-4 rounded shadow text-white">PESANAN MASUK</div>
+        <div class="stat-card bg-blue-800 p-4 rounded shadow text-center"> <!-- Changed color to blue -->
+            <div class="text-lg font-semibold">TOTAL BOOKING</div>
+            <div class="text-2xl font-bold mt-2">{{ $totalBooking }}</div>
+        </div>
+        <div class="stat-card bg-green-800 p-4 rounded shadow text-center"> <!-- Changed color to green -->
+            <div class="text-lg font-semibold">KEUNTUNGAN</div>
+            <div class="text-2xl font-bold mt-2">$4567</div> <!-- Replace 4567 with dynamic data -->
+        </div>
+        <div class="stat-card bg-red-800 p-4 rounded shadow text-center"> <!-- Changed color to red -->
+            <div class="text-lg font-semibold">PESANAN MASUK</div>
+            <div class="text-2xl font-bold mt-2">89</div> <!-- Replace 89 with dynamic data -->
+        </div>
     </div>
 
     <div class="chart-area mt-5 bg-gray-800 p-4 rounded shadow">
-        <!-- Replace with your chart code -->
         <h5 class="mb-4 font-semibold text-white">Chart Area</h5>
         <div id="chart" style="height: 300px;">
             <!-- Your chart implementation goes here -->
