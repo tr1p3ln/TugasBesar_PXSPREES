@@ -179,6 +179,15 @@ class BookingController extends Controller
                 'status' => 'pending' // Status awal booking
             ]);
 
+            $payment = new \App\Models\Payment([ // Pastikan namespace model Payment benar
+                'booking_id' => $booking->id,
+                'amount' => $booking->total_price,
+                'payment_status' => 'pending',
+                // Anda bisa set payment_method default di sini jika mau
+                'payment_method' => 'transfer', // contoh
+            ]);
+            $payment->save();
+
             // Jika voucher digunakan, update statusnya di tabel user_vouchers
             // Logika ini sudah ada di applyAndValidateUserVoucher jika Anda memindahkannya
             // Jika tidak, lakukan di sini:
@@ -281,9 +290,15 @@ class BookingController extends Controller
             abort(403, 'UNAUTHORIZED ACTION.');
         }
 
+        $payment = \App\Models\Payment::where('booking_id', $booking->id)->first();
+        if (!$payment) {
+        return redirect()->route('user.home')->with('error', 'Data pembayaran untuk booking ini tidak ditemukan.');
+    }
+
         // Kirim data booking ke view payment.blade.php
         return view('user.payment', [
-            'booking' => $booking
-        ]);
+        'booking' => $booking,
+        'payment' => $payment // Variabel $payment sekarang dikirim
+    ]);
     }
 }

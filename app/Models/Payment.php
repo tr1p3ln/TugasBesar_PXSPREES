@@ -10,6 +10,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Payment extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $fillable = [
+        'booking_id',
+        'payment_method',
+        'payment_status',
+        'amount',
+        'payment_proof',
+        'paid_at',
+        'notes'
+    ];
+
 
     protected $guarded = ['id'];
 
