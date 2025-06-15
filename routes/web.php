@@ -62,9 +62,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
     Route::get('/keloladata', [RoomController::class, 'view'])->name('keloladata'); // admin.keloladata
     Route::get('/rooms/create', [RoomController::class, 'create'])->name('rooms.create'); // admin.rooms.create
     Route::post('/rooms/create', [RoomController::class, 'store'])->name('rooms.store'); // admin.rooms.store
-    Route::get('/rooms/{id}/edit', [RoomController::class, 'edit'])->name('rooms.edit'); // admin.rooms.edit
-    Route::put('/rooms/{id}', [RoomController::class, 'update'])->name('rooms.update'); // admin.rooms.update
-    Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->name('rooms.destroy'); // admin.rooms.destroy
+    Route::get('/rooms/{room}/edit', [RoomController::class, 'edit'])->name('rooms.edit');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+    Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.updateStatus');
 
     // Vouchers Management (CRUD)
     Route::get('/voucher', [VoucherController::class, 'view'])->name('voucher'); // admin.voucher
@@ -80,8 +81,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
 
     // Payment Confirmation
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index'); // admin.payments.index
-    Route::get('/payments/{payment}/show', [AdminPaymentController::class, 'show'])->name('payments.show'); // admin.payments.show
-    Route::post('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])->name('payments.confirm'); // admin.payments.confirm
+    // Route::get('/payments/{payment}/show', [AdminPaymentController::class, 'show'])->name('payments.show'); // admin.payments.show
+    // Route::post('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])->name('payments.confirm'); // admin.payments.confirm
+    Route::get('/payments/confirm', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
+     // Route baru untuk update status booking
+    Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
+    // Route untuk update status pembayaran
+    Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
 });
 
 
@@ -107,7 +114,7 @@ Route::middleware(['auth', 'verified', 'is_user'])->group(function () {
 
     // User Payment Page
     Route::get('/user/payment/{booking}', [BookingController::class, 'showPaymentPage'])->name('user.payment.show');
-    
+
     // User Booking History
     Route::get('/user/riwayat', [BookingController::class, 'index'])->name('riwayat');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');

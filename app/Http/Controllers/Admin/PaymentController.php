@@ -2,70 +2,64 @@
 
 namespace App\Http\Controllers\Admin;
 
-// Import semua kelas yang dibutuhkan
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
-use App\Notifications\PaymentConfirmed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\BookingController;
 
 class PaymentController extends Controller
 {
     /**
-     * Menampilkan halaman daftar pembayaran yang perlu diverifikasi.
+     * Menampilkan daftar pembayaran yang perlu dikonfirmasi.
      */
     public function index()
     {
-        // Ambil semua pembayaran yang statusnya 'pending' beserta data booking dan user terkait.
-        // Urutkan dari yang terbaru.
-        $payments = Payment::where('payment_status', 'pending')
-            ->with('booking.user') // Eager load relasi untuk efisiensi
-            ->latest()
-            ->get();
+        // Ambil data pembayaran yang statusnya 'pending' DAN sudah ada bukti bayar
+        $paymentsToConfirm = Payment::where('payment_status', 'pending')
+                                    ->whereNotNull('payment_proof')
+                                    ->with(['booking.user', 'booking.room']) // Eager load relasi
+                                    ->latest() // Tampilkan yang terbaru dulu
+                                    ->get();
 
-        // Tampilkan view dan kirim data payments
-        return view('admin.payments.index', compact('payments'));
+        // Kirim data ke view baru yang akan kita buat
+        return view('admin.payments.index', compact('paymentsToConfirm'));
     }
 
     /**
-     * Mengonfirmasi pembayaran yang dipilih oleh admin.
+     * Mengubah status pembayaran (Konfirmasi atau Tolak).
      */
-    public function confirm(Request $request, Payment $payment)
+    public function updateStatus(Request $request, Payment $payment)
     {
-        // Gunakan transaksi database untuk memastikan semua proses berhasil atau semua dibatalkan.
+        $validated = $request->validate([
+            'status' => 'required|in:paid,failed', // Hanya boleh diubah menjadi 'paid' atau 'failed'
+        ]);
+
+        // Gunakan transaksi untuk menjaga integritas data
         DB::beginTransaction();
-
         try {
-            // 1. Update status payment menjadi 'paid' dan catat waktu pembayarannya.
-            $payment->update([
-                'payment_status' => 'paid',
-                'paid_at' => now()
-            ]);
+            // Update status pembayaran
+            $payment->payment_status = $validated['status'];
+            $payment->paid_at = ($validated['status'] === 'paid') ? now() : null;
+            $payment->save();
 
-            // 2. Ambil booking yang terkait dan update statusnya menjadi 'confirmed'.
-            $booking = $payment->booking;
-            $booking->update(['status' => 'confirmed']);
+            // Jika pembayaran berhasil (paid), update juga status booking menjadi 'confirmed'
+            if ($validated['status'] === 'paid') {
+                $payment->booking->status = 'confirmed';
+                $payment->booking->save();
+            }
+            
+            // Jika pembayaran gagal (failed), Anda bisa menambahkan logika lain,
+            // misalnya mengembalikan status booking menjadi 'pending' atau 'cancelled'.
+            // Untuk sekarang, kita hanya update status payment.
 
-            // 3. Ambil user pemilik booking tersebut.
-            $user = $booking->user;
+            DB::commit(); // Simpan semua perubahan jika berhasil
 
-            // 4. Kirim notifikasi konfirmasi ke user.
-            $user->notify(new PaymentConfirmed($booking));
+            return back()->with('success', 'Status pembayaran berhasil diperbarui.');
 
-            // Jika semua proses berhasil, simpan perubahan ke database.
-            DB::commit();
-
-            // Kembalikan ke halaman sebelumnya dengan pesan sukses.
-            return back()->with('success', 'Booking berhasil dikonfirmasi.');
         } catch (\Exception $e) {
-            // Jika terjadi error di salah satu proses, batalkan semua perubahan.
-            DB::rollBack();
-
-            // (Opsional) Catat error ke log untuk debugging
-            \Illuminate\Support\Facades\Log::error('Gagal konfirmasi pembayaran: ' . $e->getMessage());
-
-            // Kembalikan ke halaman sebelumnya dengan pesan error.
-            return back()->with('error', 'Gagal mengonfirmasi booking. Terjadi kesalahan.');
+            DB::rollBack(); // Batalkan semua perubahan jika terjadi error
+            return back()->with('error', 'Gagal memperbarui status pembayaran: ' . $e->getMessage());
         }
     }
 }

@@ -11,9 +11,13 @@
             <i class="fas fa-home mr-2"></i> Home
         </a>
 
-        {{-- Kelola Data --}}
+        {{-- Kelola Data Ruangan --}}
         <a href="{{ route('admin.rooms.create') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-database mr-2"></i> Data
+            <i class="fas fa-database mr-2"></i> Tambah Ruangan
+        </a>
+
+        <a href="{{ route('admin.keloladata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+            <i class="fas fa-database mr-2"></i> Kelola Ruangan
         </a>
 
         {{-- Booking Data --}}

@@ -13,6 +13,28 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
+    //menampilkan semau data booking untuk admin
+    public function view(Request $request)
+    {
+        // Query dasar untuk mengambil booking
+        $query = Booking::with(['user', 'room', 'payment'])->latest();
+
+        // Terapkan filter tanggal jika ada
+        if ($request->filled('filter_status')) {
+            $query->where('status', $request->filter_status);
+        }
+        
+        if ($request->filled('filter_date')) {
+            $query->whereDate('start_time', $request->filter_date);
+        }
+
+        $bookings = $query->get();
+
+        $bookings = $query->get();
+
+        return view('admin.bookingdata', compact('bookings'));
+    }
+
     // Menampilkan form booking (sudah ada di view Anda)
     public function create()
     {
@@ -300,5 +322,16 @@ class BookingController extends Controller
         'booking' => $booking,
         'payment' => $payment // Variabel $payment sekarang dikirim
     ]);
+    }
+    //status booking
+    public function updateStatus(Request $request, Booking $booking)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,confirmed,cancelled'
+        ]);
+
+        $booking->update(['status' => $validated['status']]);
+
+        return back()->with('success', 'Status booking berhasil diperbarui.');
     }
 }
