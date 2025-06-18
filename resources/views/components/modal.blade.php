@@ -47,7 +47,9 @@ $maxWidth = [
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
     class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
-    style="display: {{ $show ? 'block' : 'none' }};"
+    <div class="{{ $show ? 'block' : 'hidden' }}">
+        <!-- Modal content goes here -->
+    </div>
 >
     <div
         x-show="show"

@@ -5,7 +5,7 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 
 Alpine.start();
-import './bootstrap';
+
 
 // Smooth scroll untuk semua halaman
 document.addEventListener('DOMContentLoaded', function() {

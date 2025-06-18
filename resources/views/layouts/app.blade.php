@@ -8,7 +8,6 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- <script src="https://cdn.tailwindcss.com"></script> --}}
@@ -19,9 +18,10 @@
     </style>
     @stack('styles')
 </head>
-<body class="font-sans text-gray-900 antialiased bg-black">
+
+<body class="font-sans text-gray-900 antialiased bg-black min-h-screen flex flex-col">
     @include('layouts.navigation')
-    
+
     <main class="flex-grow">
         {{ $slot }}
     </main>

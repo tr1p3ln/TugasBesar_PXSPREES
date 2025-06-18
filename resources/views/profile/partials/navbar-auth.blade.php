@@ -214,6 +214,10 @@
                 <a href="{{ route('home') }}#location" class="text-purple-500 hover:text-purple-700 dark:hover:text-purple-300 transition">
                     Location
                 </a>
+                <a href="{{ route('merchant') }}#location" class="text-purple-500 hover:text-purple-700 dark:hover:text-purple-300 transition">
+                    Merchant
+                </a>
+                
             </div>
 
             <!-- Mobile Menu Button and Auth Links -->
@@ -237,6 +241,9 @@
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
+                            <x-dropdown-link :href="route('riwayat')">
+                                {{ __('Riwayat') }}
+                            </x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-dropdown-link :href="route('logout')"
@@ -244,6 +251,7 @@
                                                         this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
+
                             </form>
                         </x-slot>
                     </x-dropdown>
