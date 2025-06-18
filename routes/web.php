@@ -56,7 +56,8 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admin'])->group(function () {
     // General Admin
     Route::get('/homepage', [AdminController::class, 'homepage'])->name('home'); // admin.home
-    Route::get('/exportpdf', [AdminController::class, 'exportPDF'])->name('exportpdf'); // admin.exportpdf
+    // Route::get('/exportpdf', [AdminController::class, 'exportPDF'])->name('exportpdf'); // admin.exportpdf
+    Route::get('/export-pdf', [PaymentController::class, 'exportPDF'])->name('exportpdf');
 
     // Rooms Management (CRUD)
     Route::get('/keloladata', [RoomController::class, 'view'])->name('keloladata'); // admin.keloladata
@@ -78,6 +79,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
     // Booking & Payment Data Views
     Route::get('/bookingdata', [BookingController::class, 'view'])->name('bookingdata'); // admin.bookingdata
     Route::get('/historydata', [PaymentController::class, 'view'])->name('historydata'); // admin.historydata
+    // Route::get('/historydata', [PaymentController::class, 'view'])->name('admin.historydata');
 
     // Payment Confirmation
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index'); // admin.payments.index
@@ -85,7 +87,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
     // Route::post('/payments/{payment}/confirm', [AdminPaymentController::class, 'confirm'])->name('payments.confirm'); // admin.payments.confirm
     Route::get('/payments/confirm', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
-     // Route baru untuk update status booking
+    // Route baru untuk update status booking
     Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.updateStatus');
     // Route untuk update status pembayaran
     Route::patch('/payments/{payment}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
