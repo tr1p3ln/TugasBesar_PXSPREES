@@ -137,48 +137,23 @@
             const areaChartEl = document.querySelector("#revenue-area-chart");
             if (areaChartEl) {
                 const areaChartOptions = {
-                    chart: {
-                        type: 'area',
-                        height: '400px',
-                        background: 'transparent',
-                        toolbar: {
-                            show: false
-                        }
-                    },
-                    theme: {
-                        mode: 'dark'
-                    },
-                    series: [{
-                        name: "Pendapatan",
-                        data: {!! json_encode($areaChartData) !!}
-                    }],
-                    xaxis: {
-                        categories: {!! json_encode($areaChartLabels) !!}
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        curve: 'smooth',
-                        width: 3
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: (value) => `Rp${new Intl.NumberFormat('id-ID').format(value)}`
-                        }
-                    },
+                    chart: { type: 'area', height: '400px', background: 'transparent', toolbar: { show: false }},
+                    theme: { mode: 'dark' },
+                    series: [{ name: "Pendapatan", data: {!! json_encode($areaChartData) !!} }],
+                    xaxis: { categories: {!! json_encode($areaChartLabels) !!} },
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 3 },
+                    tooltip: { y: { formatter: (value) => `Rp${new Intl.NumberFormat('id-ID').format(value)}` } },
+                    grid: { borderColor: '#374151' },
                     yaxis: {
+                        // ⬇️ TAMBAHAN BARU: Menetapkan nilai maksimum secara eksplisit
+                        max: {!! $yAxisMax !!},
                         labels: {
                             formatter: (value) => {
-                                if (value >= 1000) {
-                                    return `Rp${value/1000}K`
-                                }
+                                if (value >= 1000) { return `Rp${value/1000}K` }
                                 return `Rp${value}`;
                             }
                         }
-                    },
-                    grid: {
-                        borderColor: '#374151'
                     },
                 };
                 const areaChart = new ApexCharts(areaChartEl, areaChartOptions);
