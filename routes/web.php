@@ -69,7 +69,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
 
     // Vouchers Management (CRUD)
     Route::get('/voucher', [VoucherController::class, 'view'])->name('voucher'); // admin.voucher
-    Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('vouchers.create'); // admin.vouchers.create
+    Route::get('/vouchers/create', [VoucherController::class, 'create'])->name('voucher.create'); // admin.vouchers.create
     Route::post('/vouchers/create', [VoucherController::class, 'store'])->name('vouchers.store'); // admin.vouchers.store
     Route::get('/vouchers/{id}/edit', [VoucherController::class, 'edit'])->name('vouchers.edit'); // admin.vouchers.edit
     Route::put('/vouchers/{id}', [VoucherController::class, 'update'])->name('vouchers.update'); // admin.vouchers.update
@@ -77,7 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'is_admi
 
     // Booking & Payment Data Views
     Route::get('/bookingdata', [BookingController::class, 'view'])->name('bookingdata'); // admin.bookingdata
-    Route::get('/historydata', [PaymentController::class, 'view'])->name('historydata'); // admin.historydata
+    Route::get('/historydata', [PaymentController::class, 'index'])->name('historydata'); // admin.historydata
 
     // Payment Confirmation
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index'); // admin.payments.index
@@ -104,9 +104,8 @@ Route::middleware(['auth', 'verified', 'is_user'])->group(function () {
         return view('user.dashboard');
     })->name('dashboard');
 
-    Route::get('/user/merchant', function () {
-        return view('user.merchant');
-    })->name('merchant');
+    Route::get('/user/merchant',
+    [VoucherController::class, 'dataVoucher'])->name('merchant');
 
     // User Booking Process
     Route::get('/user/booking', [BookingController::class, 'create'])->name('booking');
@@ -136,10 +135,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ==========================
-// Resource Routes (jika masih diperlukan di luar grup)
+// Resource Routes (jangan di comment)
 // ==========================
-// Route::resource('rooms', RoomController::class);
-// Route::resource('vouchers', VoucherController::class);
+Route::resource('rooms', RoomController::class);
+Route::resource('vouchers', VoucherController::class);
 
 
 // ==========================

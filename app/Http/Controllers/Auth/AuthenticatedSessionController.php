@@ -154,7 +154,7 @@ public function store(Request $request): RedirectResponse
         $isFromAdmin = str_contains($request->headers->get('referer'), '/admin');
 
         return $isFromAdmin
-            ? redirect('/admin/login')
+            ? redirect('/login')
             : redirect('/login');
     }
 }

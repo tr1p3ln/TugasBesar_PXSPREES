@@ -15,6 +15,13 @@ class VoucherController extends Controller
         return view('admin.voucher', compact('vouchers'));
     }
 
+
+    public function dataVoucher()
+    {
+        $vouchers = Voucher::all();
+        return view('user.merchant', compact('vouchers')); // <--- Change 'merchant' to 'user.merchant'
+    }
+
     public function create()
     {
         return view('admin.vouchercreate'); 
@@ -29,7 +36,7 @@ class VoucherController extends Controller
             'description'      => 'required|string',
             'point_required'   => 'required|integer|min:0',
             'voucher_code'     => 'required|string|unique:vouchers,voucher_code',
-            'discount_amount'  => 'required|numeric|min:0',
+            'discount_amount'  => 'nullable|numeric|min:0',
             'start_date'       => 'required|date',
             'end_date'         => 'required|date|after_or_equal:start_date',
             'is_active'        => 'required|boolean',

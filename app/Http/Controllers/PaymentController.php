@@ -68,15 +68,15 @@ class PaymentController extends Controller
     }
 
     public function index()
-    {
-        $paymentsToConfirm = Payment::where('payment_status', 'pending')
-                                    ->whereNotNull('payment_proof')
-                                    ->with(['booking.user', 'booking.room'])
-                                    ->latest()
-                                    ->get();
+        {
+            $paymentsToConfirm = Payment::where('payment_status', 'pending')
+                                        ->whereNotNull('payment_proof')
+                                        ->with(['booking.user', 'booking.room'])
+                                        ->latest()
+                                        ->get();
 
-        return view('admin.payments.index', compact('paymentsToConfirm'));
-    }
+            return view('admin.payments.pending_payments', compact('paymentsToConfirm')); // <-- Nama view baru
+        }
 
     public function updateStatus(Request $request, Payment $payment)
     {
