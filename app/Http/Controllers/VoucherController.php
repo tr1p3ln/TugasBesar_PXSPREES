@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 
 class VoucherController extends Controller
 {
-    public function view()
+    public function index()
     {
         $vouchers = Voucher::all();
         return view('admin.voucher', compact('vouchers'));

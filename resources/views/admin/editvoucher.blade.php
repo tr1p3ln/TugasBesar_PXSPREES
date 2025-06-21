@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="flex justify-end space-x-4">
-                    <a href="{{ route('admin.voucher') }}"
+                    <a href="{{ route('admin.vouchers.index') }}"
                         class="px-6 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition duration-300">
                         Batal
                     </a>

@@ -5,7 +5,7 @@
         </div>
     </div>
 
-    \<nav class="flex flex-col space-y-2">
+    <nav class="flex flex-col space-y-2">
     {{-- Home --}}
     {{-- Diubah dari 'admin.home' menjadi 'admin.dashboard' --}}
     <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">

@@ -85,7 +85,7 @@ public function store(Request $request): RedirectResponse
 
     // Redirect berdasarkan role
     if ($user->role === 'admin') {
-        return redirect()->intended(route('admin.home'));
+        return redirect()->intended(route('admin.dashboard'));
     }
 
     // Jika bukan admin, redirect ke homepage user

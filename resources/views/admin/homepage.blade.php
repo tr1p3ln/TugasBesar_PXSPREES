@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    {{-- SKRIP JAVASCRIPT (Tidak ada perubahan) --}}
+    {{-- SKRIP JAVASCRIPT (Tidak ada perubahan)
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         // ... kode javascript sama persis seperti sebelumnya ...
@@ -173,5 +173,5 @@
             }
 
         });
-    </script>
+    </script> --}}
 </x-layouts.admin>
