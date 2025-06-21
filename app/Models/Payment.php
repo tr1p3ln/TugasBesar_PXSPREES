@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory,SoftDeletes;
     protected $fillable = [
         'booking_id',
         'payment_method',
@@ -21,20 +21,18 @@ class Payment extends Model
     ];
 
 
-    protected $guarded = ['id'];
+
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
     ];
 
-    // Payment status constants
     const STATUS_PENDING = 'pending';
     const STATUS_PAID = 'paid';
     const STATUS_FAILED = 'failed';
     const STATUS_REFUNDED = 'refunded';
 
-    // Payment method constants
     const METHOD_TRANSFER = 'transfer';
     const METHOD_QR = 'qr';
 

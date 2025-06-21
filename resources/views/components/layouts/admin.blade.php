@@ -5,6 +5,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Add Font Awesome -->
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Add Font Awesome -->
 </head>
 <body class="bg-gray-900 text-white antialiased font-sans transition-colors duration-300">
     @include('components.admin-sidebar')

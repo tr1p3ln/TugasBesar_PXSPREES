@@ -8,11 +8,6 @@ use App\Notifications\ProofUploaded;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Tambahkan ini untuk logging error
-// use Barryvdh\DomPDF\Facade\Pdfl;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Carbon;
-
 
 class PaymentController extends Controller
 {
@@ -138,6 +133,7 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:transfer,qr'
         ]);
 
+        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
         try {
             if ($payment->payment_proof) {
                 Storage::disk('public')->delete($payment->payment_proof);
@@ -149,9 +145,13 @@ class PaymentController extends Controller
                 'payment_proof' => $path,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => 'pending',
-                // 'paid_at' => now(), // <-- Lihat saran perbaikan di bawah
+                'paid_at' => now(),
             ]);
 
+            // Notify admins
+            // User::where('role', 'admin')->get()->each(function ($admin) use ($payment) {
+            //     $admin->notify(new ProofUploaded($payment));
+            // });
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
                 $admin->notify(new ProofUploaded($payment));
@@ -170,46 +170,63 @@ class PaymentController extends Controller
     {
         abort_unless(Storage::disk('public')->exists($payment->payment_proof), 404, 'File bukti tidak ditemukan.');
 
-        $path = Storage::disk('public')->path($payment->payment_proof);
-        $filename = basename($path);
-
-        return response()->download($path, $filename);
+        return Storage::download($payment->payment_proof);
     }
 
-    /**
-     * =========================================================
-     * METHOD BARU UNTUK EXPORT PDF
-     * =========================================================
-     */
-    public function exportPDF(Request $request)
+    public function index()
+        {
+            $paymentsToConfirm = Payment::where('payment_status', 'pending')
+                                        ->whereNotNull('payment_proof')
+                                        ->with(['booking.user', 'booking.room'])
+                                        ->latest()
+                                        ->get();
+
+            return view('admin.payments.pending_payments', compact('paymentsToConfirm')); // <-- Nama view baru
+        }
+
+    public function updateStatus(Request $request, Payment $payment)
     {
-        // 1. Ambil data dengan logika filter yang sama seperti method view()
-        $startDateInput = $request->input('start_date') ?? Carbon::now()->startOfMonth()->toDateString();
-        $endDateInput = $request->input('end_date') ?? Carbon::now()->endOfMonth()->toDateString();
+        $validated = $request->validate([
+            'status' => 'required|in:pending,paid,failed',
+        ]);
 
-        $startDate = Carbon::parse($startDateInput)->startOfDay();
-        $endDate = Carbon::parse($endDateInput)->endOfDay();
-
-        $payments = Payment::with(['booking.user', 'booking.room'])
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->latest()
-            ->get();
+        // Gunakan transaksi untuk menjaga integritas data
+        DB::beginTransaction();
+        try {
+            // 1. Update status payment
+            $payment->payment_status = $validated['status'];
             
-        // Hitung total pendapatan untuk ditampilkan di footer PDF
-        $totalAmount = $payments->where('payment_status', 'paid')->sum('amount');
+            // 2. Jika statusnya 'paid', catat tanggalnya. Jika tidak, kosongkan.
+            $payment->paid_at = ($validated['status'] === 'paid') ? now() : null;
+            $payment->save();
 
-        // 2. Siapkan data untuk dikirim ke view PDF
-        $data = [
-            'payments' => $payments,
-            'totalAmount' => $totalAmount,
-            'startDate' => $startDate->format('d M Y'),
-            'endDate' => $endDate->format('d M Y'),
-        ];
+            // 3. Sinkronkan status booking yang terkait
+            if ($validated['status'] === 'paid') {
+                // Jika pembayaran lunas, booking dikonfirmasi
+                $payment->booking->status = 'confirmed';
+            } elseif ($validated['status'] === 'failed') {
+                // Jika pembayaran gagal, booking dibatalkan
+                $payment->booking->status = 'cancelled';
+            } else {
+                // Jika dikembalikan ke pending, booking juga pending
+                $payment->booking->status = 'pending';
+            }
+            $payment->booking->save();
+            
+            // (Opsional) Kirim notifikasi ke user jika pembayaran dikonfirmasi
+            // if ($payment->payment_status === 'paid') {
+            //     $payment->booking->user->notify(new PaymentConfirmed($payment->booking));
+            // }
 
-        // 3. Load view PDF dengan data, lalu buat PDF-nya
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.history_pdf', $data);
+            DB::commit(); // Simpan semua perubahan jika berhasil
 
-        // 4. Download file PDF dengan nama dinamis
-        return $pdf->download('laporan-transaksi-' . $startDate->format('Y-m-d') . '-' . $endDate->format('Y-m-d') . '.pdf');
+            return back()->with('success', 'Status pembayaran berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // Batalkan semua perubahan jika terjadi error
+            // Tulis error ke log untuk debugging
+            \Illuminate\Support\Facades\Log::error('Update Payment Status Failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memperbarui status pembayaran.');
+        }
     }
 }

@@ -10,73 +10,83 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
-    public function homepage(Request $request)
+    public function homepage()
     {
-        // ... (Kode untuk filter tanggal dan kartu statistik tidak berubah)
-        $startDateInput = $request->input('start_date') ?? Carbon::now()->toDateString();
-        $endDateInput = $request->input('end_date') ?? Carbon::now()->toDateString();
-        $startDate = Carbon::parse($startDateInput)->startOfDay();
-        $endDate = Carbon::parse($endDateInput)->endOfDay();
-        $dateTitle = ($startDateInput == $endDateInput) ? 'Hari Ini (' . Carbon::parse($startDateInput)->format('d M Y') . ')' : 'Periode ' . Carbon::parse($startDateInput)->format('d M') . ' - ' . Carbon::parse($endDateInput)->format('d M Y');
-        
-        $totalRevenue = Payment::where('payment_status', 'paid')->whereBetween('paid_at', [$startDate, $endDate])->sum('amount');
-        $totalSuccessfulBookings = Payment::where('payment_status', 'paid')->whereBetween('paid_at', [$startDate, $endDate])->count();
-        $pendingPaymentsCount = Payment::where('payment_status', 'pending')->whereNotNull('payment_proof')->count();
-        $recentTransactions = Payment::where('payment_status', 'paid')->with(['booking.user', 'booking.room'])->latest('paid_at')->take(5)->get();
+        // 1. Menghitung Keuntungan: Jumlahkan 'amount' dari semua payment yang statusnya 'paid'
+        $totalRevenue = Payment::where('payment_status', 'paid')->sum('amount');
 
-        // LOGIKA GRAFIK AREA
-        $revenueData = Payment::where('payment_status', 'paid')
-            ->whereBetween('paid_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(paid_at) as date'), DB::raw('sum(amount) as total'))
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->pluck('total', 'date');
-        $dateRange = Carbon::parse($startDate)->toPeriod($endDate);
-        $areaChartData = [];
-        $areaChartLabels = [];
-        foreach ($dateRange as $date) {
-            $formattedDate = $date->format('Y-m-d');
-            $areaChartLabels[] = $date->format('d M');
-            $areaChartData[] = (int) ($revenueData[$formattedDate] ?? 0);
-        }
-        
-        // =======================================================
-        // TAMBAHAN BARU: Menghitung Nilai Maksimum untuk Sumbu-Y
-        // =======================================================
-        // Cari nilai tertinggi dari data pendapatan yang ada
-        $maxRevenueForChart = count($areaChartData) > 0 ? max($areaChartData) : 0;
-        // Tambahkan 10% padding agar grafik tidak menyentuh atap, atau set default jika tidak ada data
-        $yAxisMax = $maxRevenueForChart > 0 ? floor($maxRevenueForChart * 1.1) : 100000; // Default max 100K jika tidak ada pendapatan
+        // 2. Menghitung Total Booking Sukses: Hitung jumlah payment yang statusnya 'paid'
+        $totalSuccessfulBookings = Payment::where('payment_status', 'paid')->count();
 
+        // 3. Menghitung Pesanan Masuk: Hitung jumlah payment 'pending' yang sudah ada bukti bayar
+        $pendingPaymentsCount = Payment::where('payment_status', 'pending')
+            ->whereNotNull('payment_proof')
+            ->count();
 
-        // LOGIKA PIE CHART (tidak berubah)
-        $allConsoleTypes = Room::distinct()->pluck('console_type');
-        $revenueByConsole = Payment::where('payments.payment_status', 'paid')
-            ->whereBetween('payments.paid_at', [$startDate, $endDate])
-            ->join('bookings', 'payments.booking_id', '=', 'bookings.id')
-            ->join('rooms', 'bookings.room_id', '=', 'rooms.id')
-            ->select('rooms.console_type', DB::raw('SUM(payments.amount) as total_revenue'))
-            ->groupBy('rooms.console_type')
-            ->pluck('total_revenue', 'console_type');
-        $pieChartLabels = $allConsoleTypes;
-        $pieChartData = $allConsoleTypes->map(function ($consoleType) use ($revenueByConsole) {
-            return (int) ($revenueByConsole[$consoleType] ?? 0);
-        })->values();
+        // 4. (Bonus) Ambil data transaksi terbaru untuk ditampilkan di tabel
+        $recentTransactions = Payment::where('payment_status', 'paid')
+            ->with(['booking.user', 'booking.room']) // Eager load untuk efisiensi
+            ->whereNotNull('paid_at') // Memastikan hanya mengambil data dengan tanggal bayar
+            ->take(5) // Ambil 5 data teratas
+            ->get();
 
-        // KIRIM SEMUA DATA KE VIEW
+        // Kirim semua data ke view
         return view('admin.homepage', [
             'totalRevenue' => $totalRevenue,
-            'totalBooking' => $totalSuccessfulBookings,
-            'pendingPayments' => $pendingPaymentsCount,
+            'totalBooking' => $totalSuccessfulBookings, // Gunakan nama variabel 'totalBooking' sesuai view
+            'pendingPayments' => $pendingPaymentsCount, // Gunakan nama variabel 'pendingPayments'
             'recentTransactions' => $recentTransactions,
-            'areaChartLabels' => $areaChartLabels,
-            'areaChartData' => $areaChartData,
-            'yAxisMax' => $yAxisMax, // <-- KIRIM NILAI MAKSIMUM KE VIEW
-            'pieChartLabels' => $pieChartLabels,
-            'pieChartData' => $pieChartData,
-            'start_date' => $startDateInput,
-            'end_date' => $endDateInput,
-            'dateTitle' => $dateTitle,
         ]);
     }
+
+    // Fungsi untuk menampilkan halaman riwayat transaksi
+    public function historydata(Request $request)
+    {
+        $filterDate = $request->input('filter_date');
+
+        $payments = Payment::query();
+
+        if ($filterDate) {
+            $payments->whereDate('created_at', $filterDate);
+        }
+
+        $payments = $payments->get();
+
+        return view('admin.historydata', compact('payments'));
+    }
+
+    // Fungsi untuk export PDF
+    public function exportPDF(Request $request)
+    {
+        $filterDate = $request->input('filter_date');
+
+        $payments = Payment::query();
+
+        if ($filterDate) {
+            $payments->whereDate('created_at', $filterDate);
+        }
+
+        $payments = $payments->get();
+
+        $pdf = Pdf::loadView('admin.exportpdf', compact('payments', 'filterDate'));
+        return $pdf->download('history-transaksi.pdf');
+    }
+
+    public function bookingData(Request $request)
+    {
+        $query = Booking::query();
+
+        if ($request->has('filter_date') && $request->filter_date) {
+            $query->whereDate('start_time', $request->filter_date);
+        }
+
+        $bookings = $query->orderBy('start_time', 'desc')->get();
+        return view('admin.bookingdata', compact('bookings'));
+    }
+
+    // public function homepage()
+    // {
+    //     $totalBooking = \App\Models\Booking::count();
+    //     return view('admin.homepage', compact('totalBooking'));
+    // }
 }
