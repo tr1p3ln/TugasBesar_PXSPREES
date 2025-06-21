@@ -89,7 +89,7 @@ public function store(Request $request): RedirectResponse
     }
 
     // Jika bukan admin, redirect ke homepage user
-    return redirect()->intended(route('user.home'));
+    return redirect()->intended(route('user.dashboard'));
 }
 
 

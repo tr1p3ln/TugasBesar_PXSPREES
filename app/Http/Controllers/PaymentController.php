@@ -6,27 +6,20 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\ProofUploaded;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
     /**
      * =========================================================
+    /**
      * METHOD BARU UNTUK MENAMPILKAN HALAMAN HISTORY TRANSAKSI
      * =========================================================
      * Method inilah yang dicari oleh route 'admin.historydata' Anda.
      */
-    // public function view(Request $request)
-    // {
-    //     // Ambil semua data pembayaran, diurutkan dari yang terbaru
-    //     $payments = Payment::latest()->get();
-
-    //     // Kirim data ke view 'admin.historydata'
-    //     return view('admin.historydata', [
-    //         'payments' => $payments
-    //     ]);
-    // }
     public function view(Request $request)
     {
         // 1. Ambil input tanggal dari request (URL).
@@ -171,62 +164,5 @@ class PaymentController extends Controller
         abort_unless(Storage::disk('public')->exists($payment->payment_proof), 404, 'File bukti tidak ditemukan.');
 
         return Storage::download($payment->payment_proof);
-    }
-
-    public function index()
-        {
-            $paymentsToConfirm = Payment::where('payment_status', 'pending')
-                                        ->whereNotNull('payment_proof')
-                                        ->with(['booking.user', 'booking.room'])
-                                        ->latest()
-                                        ->get();
-
-            return view('admin.payments.pending_payments', compact('paymentsToConfirm')); // <-- Nama view baru
-        }
-
-    public function updateStatus(Request $request, Payment $payment)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,paid,failed',
-        ]);
-
-        // Gunakan transaksi untuk menjaga integritas data
-        DB::beginTransaction();
-        try {
-            // 1. Update status payment
-            $payment->payment_status = $validated['status'];
-            
-            // 2. Jika statusnya 'paid', catat tanggalnya. Jika tidak, kosongkan.
-            $payment->paid_at = ($validated['status'] === 'paid') ? now() : null;
-            $payment->save();
-
-            // 3. Sinkronkan status booking yang terkait
-            if ($validated['status'] === 'paid') {
-                // Jika pembayaran lunas, booking dikonfirmasi
-                $payment->booking->status = 'confirmed';
-            } elseif ($validated['status'] === 'failed') {
-                // Jika pembayaran gagal, booking dibatalkan
-                $payment->booking->status = 'cancelled';
-            } else {
-                // Jika dikembalikan ke pending, booking juga pending
-                $payment->booking->status = 'pending';
-            }
-            $payment->booking->save();
-            
-            // (Opsional) Kirim notifikasi ke user jika pembayaran dikonfirmasi
-            // if ($payment->payment_status === 'paid') {
-            //     $payment->booking->user->notify(new PaymentConfirmed($payment->booking));
-            // }
-
-            DB::commit(); // Simpan semua perubahan jika berhasil
-
-            return back()->with('success', 'Status pembayaran berhasil diperbarui.');
-
-        } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan semua perubahan jika terjadi error
-            // Tulis error ke log untuk debugging
-            \Illuminate\Support\Facades\Log::error('Update Payment Status Failed: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memperbarui status pembayaran.');
-        }
     }
 }

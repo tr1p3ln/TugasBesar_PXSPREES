@@ -5,34 +5,40 @@
         </div>
     </div>
 
-    <nav class="flex flex-col space-y-2">
-        {{-- Home --}}
-        <a href="{{ route('admin.home') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-home mr-2"></i> Home
-        </a>
+    \<nav class="flex flex-col space-y-2">
+    {{-- Home --}}
+    {{-- Diubah dari 'admin.home' menjadi 'admin.dashboard' --}}
+    <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-home mr-2"></i> Home
+    </a>
 
-        {{-- Kelola Data Ruangan --}}
-        <a href="{{ route('admin.rooms.create') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-database mr-2"></i> Tambah Ruangan
-        </a>
+    {{-- Kelola Data Ruangan --}}
+    {{-- Nama route ini sudah benar, tidak ada perubahan --}}
+    <a href="{{ route('admin.rooms.create') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-database mr-2"></i> Tambah Ruangan
+    </a>
 
-        <a href="{{ route('admin.keloladata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-database mr-2"></i> Kelola Ruangan
-        </a>
+    {{-- Diubah dari 'admin.keloladata' menjadi 'admin.rooms.index' --}}
+    <a href="{{ route('admin.rooms.index') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-database mr-2"></i> Kelola Ruangan
+    </a>
 
-        {{-- Booking Data --}}
-        <a href="{{ route('admin.bookingdata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-list mr-2"></i> Booking
-        </a>
+    {{-- Booking Data --}}
+    {{-- Diubah dari 'admin.bookingdata' menjadi 'admin.bookings.index' --}}
+    <a href="{{ route('admin.bookings.index') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-list mr-2"></i> Booking
+    </a>
 
-        {{-- History / Transaksi --}}
-        <a href="{{ route('admin.historydata') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-handshake mr-2"></i> Transaksi
-        </a>
+    {{-- History / Transaksi --}}
+    {{-- Diubah dari 'admin.historydata' menjadi 'admin.payments.history' --}}
+    <a href="{{ route('admin.payments.history') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-handshake mr-2"></i> Transaksi
+    </a>
 
-        {{-- Voucher --}}
-        <a href="{{ route('admin.voucher') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
-            <i class="fas fa-ticket mr-2"></i> Voucher
-        </a>
-    </nav>
+    {{-- Voucher --}}
+    {{-- Diubah dari 'admin.voucher' menjadi 'admin.vouchers.index' --}}
+    <a href="{{ route('admin.vouchers.index') }}" class="sidebar-item flex items-center py-3 px-5 text-white font-medium hover:bg-blue-600 transition duration-300 rounded-lg">
+        <i class="fas fa-ticket mr-2"></i> Voucher
+    </a>
+</nav>
 </div>
