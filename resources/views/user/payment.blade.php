@@ -133,7 +133,7 @@
                         @else
                             {{-- FORM UPLOAD BUKTI PEMBAYARAN --}}
                             <h3 class="text-xl font-semibold text-center mb-4">Konfirmasi Pembayaran Anda</h3>
-                            <form action="{{ route('payment.upload', $payment->id) }}" method="POST"
+                            <form action="{{ route('payment.uploadProof', $payment->id) }}" method="POST"
                                 enctype="multipart/form-data" class="max-w-md mx-auto">
                                 @csrf
                                 {{-- Input tersembunyi untuk menyimpan metode yang dipilih --}}

@@ -8,7 +8,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf; // Asumsi Anda menggunakan library ini untuk PDF
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -49,17 +49,21 @@ class AdminController extends Controller
             ->pluck('total', 'date');
 
         $dateRange = Carbon::parse($startDate)->toPeriod($endDate);
-        $areaChartData = [];
-        $areaChartLabels = [];
+        
+        // ===============================================
+        // FIX: Mengganti nama variabel agar cocok dengan view
+        // ===============================================
+        $chartData = []; // Sebelumnya: $areaChartData
+        $chartLabels = []; // Sebelumnya: $areaChartLabels
 
         foreach ($dateRange as $date) {
             $formattedDate = $date->format('Y-m-d');
-            $areaChartLabels[] = $date->format('d M');
-            $areaChartData[] = (int) ($revenueData[$formattedDate] ?? 0);
+            $chartLabels[] = $date->format('d M');
+            $chartData[] = (int) ($revenueData[$formattedDate] ?? 0);
         }
         
         // Menghitung nilai maksimum untuk sumbu Y pada grafik
-        $maxRevenueForChart = count($areaChartData) > 0 ? max($areaChartData) : 0;
+        $maxRevenueForChart = count($chartData) > 0 ? max($chartData) : 0; // Menggunakan $chartData
         $yAxisMax = $maxRevenueForChart > 0 ? floor($maxRevenueForChart * 1.1) : 100000;
 
         // MENYIAPKAN DATA UNTUK PIE CHART (PENDAPATAN PER TIPE KONSOL)
@@ -83,8 +87,8 @@ class AdminController extends Controller
             'totalBooking' => $totalSuccessfulBookings,
             'pendingPayments' => $pendingPaymentsCount,
             'recentTransactions' => $recentTransactions,
-            'areaChartLabels' => $areaChartLabels,
-            'areaChartData' => $areaChartData,
+            'chartLabels' => $chartLabels,       // FIX: Mengirim $chartLabels
+            'chartData' => $chartData,         // FIX: Mengirim $chartData
             'yAxisMax' => $yAxisMax,
             'pieChartLabels' => $pieChartLabels,
             'pieChartData' => $pieChartData,
@@ -99,13 +103,8 @@ class AdminController extends Controller
      */
     public function exportPDF()
     {
-        // Anda perlu menambahkan logika untuk mengambil data yang ingin diekspor
-        $data = [
-            'title' => 'Laporan Transaksi',
-            // ...data lainnya
-        ]; 
-
-        $pdf = Pdf::loadView('pdf.transactions', $data); // Buat view pdf.transactions
+        $data = [ 'title' => 'Laporan Transaksi' ]; 
+        $pdf = Pdf::loadView('pdf.transactions', $data);
         return $pdf->download('laporan-transaksi.pdf');
     }
 }
