@@ -11,28 +11,28 @@
             <i class="fas fa-home mr-3 w-5 text-center"></i> Dashboard
         </a>
 
-        {{-- Kelola Ruangan --}}
-        <a href="{{ route('admin.rooms.index') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+        {{-- Kelola Ruangan (Mengarah ke keloladata) --}}
+        <a href="{{ route('admin.keloladata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
             <i class="fas fa-person-booth mr-3 w-5 text-center"></i> Kelola Ruangan
         </a>
         
-        {{-- Kelola Voucher --}}
-        <a href="{{ route('admin.vouchers.index') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+        {{-- Kelola Voucher (Mengarah ke voucher) --}}
+        <a href="{{ route('admin.voucher') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
             <i class="fas fa-ticket-alt mr-3 w-5 text-center"></i> Kelola Voucher
         </a>
 
-        {{-- Data Booking --}}
-        <a href="{{ route('admin.bookings.index') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+        {{-- Data Booking (Mengarah ke bookingdata) --}}
+        <a href="{{ route('admin.bookingdata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
             <i class="fas fa-list-alt mr-3 w-5 text-center"></i> Data Booking
         </a>
         
-        {{-- Konfirmasi Pembayaran --}}
-        <a href="{{ route('admin.payments.index') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+        {{-- Konfirmasi Pembayaran (Mengarah ke payments.pending) --}}
+        <a href="{{ route('admin.payments.pending') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
             <i class="fas fa-check-circle mr-3 w-5 text-center"></i> Konfirmasi Bayar
         </a>
 
-        {{-- Riwayat Pembayaran --}}
-        <a href="{{ route('admin.payments.history') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+        {{-- Riwayat Pembayaran (Mengarah ke historydata) --}}
+        <a href="{{ route('admin.historydata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
             <i class="fas fa-history mr-3 w-5 text-center"></i> Riwayat Transaksi
         </a>
     </nav>

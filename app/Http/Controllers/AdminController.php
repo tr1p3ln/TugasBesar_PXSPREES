@@ -51,19 +51,19 @@ class AdminController extends Controller
         $dateRange = Carbon::parse($startDate)->toPeriod($endDate);
         
         // ===============================================
-        // FIX: Mengganti nama variabel agar cocok dengan view
+        // FIX: Mengembalikan nama variabel agar cocok dengan view Anda
         // ===============================================
-        $chartData = []; // Sebelumnya: $areaChartData
-        $chartLabels = []; // Sebelumnya: $areaChartLabels
+        $areaChartData = [];
+        $areaChartLabels = [];
 
         foreach ($dateRange as $date) {
             $formattedDate = $date->format('Y-m-d');
-            $chartLabels[] = $date->format('d M');
-            $chartData[] = (int) ($revenueData[$formattedDate] ?? 0);
+            $areaChartLabels[] = $date->format('d M');
+            $areaChartData[] = (int) ($revenueData[$formattedDate] ?? 0);
         }
         
         // Menghitung nilai maksimum untuk sumbu Y pada grafik
-        $maxRevenueForChart = count($chartData) > 0 ? max($chartData) : 0; // Menggunakan $chartData
+        $maxRevenueForChart = count($areaChartData) > 0 ? max($areaChartData) : 0;
         $yAxisMax = $maxRevenueForChart > 0 ? floor($maxRevenueForChart * 1.1) : 100000;
 
         // MENYIAPKAN DATA UNTUK PIE CHART (PENDAPATAN PER TIPE KONSOL)
@@ -87,8 +87,8 @@ class AdminController extends Controller
             'totalBooking' => $totalSuccessfulBookings,
             'pendingPayments' => $pendingPaymentsCount,
             'recentTransactions' => $recentTransactions,
-            'chartLabels' => $chartLabels,       // FIX: Mengirim $chartLabels
-            'chartData' => $chartData,         // FIX: Mengirim $chartData
+            'areaChartLabels' => $areaChartLabels, // Variabel yang diharapkan view
+            'areaChartData' => $areaChartData,   // Variabel yang diharapkan view
             'yAxisMax' => $yAxisMax,
             'pieChartLabels' => $pieChartLabels,
             'pieChartData' => $pieChartData,

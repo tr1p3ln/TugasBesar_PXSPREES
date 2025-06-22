@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\BookingController;
+use Illuminate\Support\Carbon; // Pastikan Carbon di-import
 
 class PaymentController extends Controller
 {
@@ -15,16 +15,48 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        // Ambil data pembayaran yang statusnya 'pending' DAN sudah ada bukti bayar
         $paymentsToConfirm = Payment::where('payment_status', 'pending')
                                     ->whereNotNull('payment_proof')
-                                    ->with(['booking.user', 'booking.room']) // Eager load relasi
-                                    ->latest() // Tampilkan yang terbaru dulu
+                                    ->with(['booking.user', 'booking.room'])
+                                    ->latest()
                                     ->get();
 
-        // Kirim data ke view baru yang akan kita buat
-        return view('admin.payments.index', compact('paymentsToConfirm'));
+        return view('admin.payments.pending_payments', compact('paymentsToConfirm'));
     }
+
+    /**
+     * ===============================================
+     * METHOD BARU UNTUK MENAMPILKAN RIWAYAT TRANSAKSI
+     * ===============================================
+     */
+    public function history(Request $request)
+    {
+        // 1. Ambil input tanggal dari request (URL).
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // 2. Buat query dasar untuk mengambil semua payment.
+        $query = Payment::with(['booking.user', 'booking.room'])->latest();
+
+        // 3. Jika ada input tanggal, terapkan filter.
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                Carbon::parse($startDate)->startOfDay(), 
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        }
+
+        // 4. Eksekusi query.
+        $payments = $query->get();
+
+        // 5. Kirim data ke view historydata.
+        return view('admin.historydata', [
+            'payments' => $payments,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ]);
+    }
+
 
     /**
      * Mengubah status pembayaran (Konfirmasi atau Tolak).
@@ -32,33 +64,30 @@ class PaymentController extends Controller
     public function updateStatus(Request $request, Payment $payment)
     {
         $validated = $request->validate([
-            'status' => 'required|in:paid,failed', // Hanya boleh diubah menjadi 'paid' atau 'failed'
+            'status' => 'required|in:pending,paid,failed',
         ]);
 
-        // Gunakan transaksi untuk menjaga integritas data
         DB::beginTransaction();
         try {
-            // Update status pembayaran
             $payment->payment_status = $validated['status'];
             $payment->paid_at = ($validated['status'] === 'paid') ? now() : null;
             $payment->save();
 
-            // Jika pembayaran berhasil (paid), update juga status booking menjadi 'confirmed'
             if ($validated['status'] === 'paid') {
                 $payment->booking->status = 'confirmed';
-                $payment->booking->save();
+            } elseif ($validated['status'] === 'failed') {
+                $payment->booking->status = 'cancelled';
+            } else {
+                $payment->booking->status = 'pending';
             }
+            $payment->booking->save();
             
-            // Jika pembayaran gagal (failed), Anda bisa menambahkan logika lain,
-            // misalnya mengembalikan status booking menjadi 'pending' atau 'cancelled'.
-            // Untuk sekarang, kita hanya update status payment.
-
-            DB::commit(); // Simpan semua perubahan jika berhasil
+            DB::commit();
 
             return back()->with('success', 'Status pembayaran berhasil diperbarui.');
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan semua perubahan jika terjadi error
+            DB::rollBack();
             return back()->with('error', 'Gagal memperbarui status pembayaran: ' . $e->getMessage());
         }
     }
