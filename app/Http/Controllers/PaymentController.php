@@ -6,57 +6,45 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Notifications\ProofUploaded;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
 
 class PaymentController extends Controller
 {
     /**
-     * =========================================================
-    /**
-     * METHOD BARU UNTUK MENAMPILKAN HALAMAN HISTORY TRANSAKSI
-     * =========================================================
-     * Method inilah yang dicari oleh route 'admin.historydata' Anda.
+     * Menampilkan halaman history transaksi untuk admin dengan filter tanggal.
+     * Method ini digunakan oleh route 'admin.historydata' atau 'admin.payments.history'.
      */
     public function view(Request $request)
     {
-        // 1. Ambil input tanggal dari request (URL).
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        // 2. Buat query dasar untuk mengambil semua payment.
-        //    Sertakan juga relasi agar efisien.
         $query = Payment::with(['booking.user', 'booking.room'])->latest();
 
-        // 3. Jika ada input tanggal, terapkan filter 'whereBetween'.
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [
-                Carbon::parse($startDate)->startOfDay(), 
+                Carbon::parse($startDate)->startOfDay(),
                 Carbon::parse($endDate)->endOfDay()
             ]);
         }
 
-        // 4. Eksekusi query untuk mendapatkan hasilnya.
         $payments = $query->get();
 
-        // 5. Kirim data ke view.
         return view('admin.historydata', [
             'payments' => $payments,
-            'start_date' => $startDate, // <-- VARIABEL INI HARUS DIKIRIM
-            'end_date' => $endDate,     // <-- DAN VARIABEL INI JUGA
+            'start_date' => $startDate,
+            'end_date' => $endDate,
         ]);
     }
 
-
-    //---------------------------------------------------------
-    // Method di bawah ini adalah yang sudah Anda miliki sebelumnya
-    // Tidak ada yang diubah, hanya ditata ulang.
-    //---------------------------------------------------------
-
     /**
      * Menampilkan daftar pembayaran yang perlu dikonfirmasi oleh admin.
+     * Method ini untuk halaman khusus konfirmasi.
      */
     public function index()
     {
@@ -70,53 +58,6 @@ class PaymentController extends Controller
     }
 
     /**
-     * Menampilkan detail satu pembayaran.
-     */
-    public function show(Payment $payment)
-    {
-        $payment->load(['booking.room', 'booking.user']);
-
-        return view('payments.show', [
-            'payment' => $payment,
-            'booking' => $payment->booking
-        ]);
-    }
-
-    /**
-     * Mengizinkan admin mengubah status pembayaran (misal: dari pending ke paid).
-     */
-    public function updateStatus(Request $request, Payment $payment)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,paid,failed',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            $payment->payment_status = $validated['status'];
-            $payment->paid_at = ($validated['status'] === 'paid') ? now() : null;
-            $payment->save();
-
-            if ($validated['status'] === 'paid') {
-                $payment->booking->status = 'confirmed';
-            } elseif ($validated['status'] === 'failed') {
-                $payment->booking->status = 'cancelled';
-            } else {
-                $payment->booking->status = 'pending';
-            }
-            $payment->booking->save();
-
-            DB::commit();
-
-            return back()->with('success', 'Status pembayaran berhasil diperbarui.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Update Payment Status Failed: ' . $e->getMessage());
-            return back()->with('error', 'Gagal memperbarui status pembayaran.');
-        }
-    }
-
-    /**
      * Mengizinkan user mengunggah bukti pembayaran.
      */
     public function uploadProof(Request $request, Payment $payment)
@@ -126,7 +67,6 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:transfer,qr'
         ]);
 
-        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
         try {
             if ($payment->payment_proof) {
                 Storage::disk('public')->delete($payment->payment_proof);
@@ -138,13 +78,8 @@ class PaymentController extends Controller
                 'payment_proof' => $path,
                 'payment_method' => $validated['payment_method'],
                 'payment_status' => 'pending',
-                'paid_at' => now(),
             ]);
 
-            // Notify admins
-            // User::where('role', 'admin')->get()->each(function ($admin) use ($payment) {
-            //     $admin->notify(new ProofUploaded($payment));
-            // });
             $admins = User::where('role', 'admin')->get();
             foreach ($admins as $admin) {
                 $admin->notify(new ProofUploaded($payment));
@@ -152,17 +87,56 @@ class PaymentController extends Controller
 
             return back()->with('success', 'Bukti pembayaran berhasil diunggah!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengunggah bukti: ' . $e->getMessage());
+            Log::error('Upload Proof Failed: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengunggah bukti. Silakan coba lagi.');
         }
     }
 
     /**
-     * Mengizinkan admin men-download bukti pembayaran.
+     * Mengizinkan user/admin men-download bukti pembayaran.
      */
     public function downloadProof(Payment $payment)
     {
+        // Pastikan properti payment_proof ada dan tidak kosong
+        abort_if(!$payment->payment_proof, 404, 'Bukti pembayaran tidak tersedia.');
+
+        // Pastikan file benar-benar ada di storage sebelum mencoba download
         abort_unless(Storage::disk('public')->exists($payment->payment_proof), 404, 'File bukti tidak ditemukan.');
 
-        return Storage::download($payment->payment_proof);
+        // Gunakan method download dari Storage facade
+        // return Storage::disk('public')->download($payment->payment_proof);
+        $filePath = storage_path('app/public/' . $payment->payment_proof);
+        return response()->download($filePath);
+    }
+
+    /**
+     * Mengekspor data transaksi ke dalam format PDF.
+     */
+    public function exportPDF(Request $request)
+    {
+        $startDateInput = $request->input('start_date') ?? Carbon::now()->startOfMonth()->toDateString();
+        $endDateInput = $request->input('end_date') ?? Carbon::now()->endOfMonth()->toDateString();
+
+        $startDate = Carbon::parse($startDateInput)->startOfDay();
+        $endDate = Carbon::parse($endDateInput)->endOfDay();
+
+        $payments = Payment::with(['booking.user', 'booking.room'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->latest()
+            ->get();
+
+        $totalAmount = $payments->where('payment_status', 'paid')->sum('amount');
+
+        $data = [
+            'payments' => $payments,
+            'totalAmount' => $totalAmount,
+            'startDate' => $startDate->format('d M Y'),
+            'endDate' => $endDate->format('d M Y'),
+        ];
+
+        // Gunakan facade Pdf yang sudah di-import
+        $pdf = Pdf::loadView('admin.history_pdf', $data);
+
+        return $pdf->download('laporan-transaksi-' . $startDate->format('Y-m-d') . '-sampai-' . $endDate->format('Y-m-d') . '.pdf');
     }
 }
