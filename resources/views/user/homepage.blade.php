@@ -49,6 +49,7 @@
                 <img src="{{ asset('assets/picture/vip.png') }}" alt="VIP Room" class="w-24 md:w-32" />
             </div>
         </div>
+        
 
         <!-- Room section -->
         <div class="room" id="room">
@@ -69,7 +70,7 @@
             <div class="px-4 mx-auto max-w-screen-xl text-center py-24 lg:py-56">
                 <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-white md:text-5xl lg:text-6xl uppercase">booking now!</h1>
                 <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
-                    <a href="{{ url('/booking') }}" class="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition">Booking</a>
+                    <a href="{{ route('user.booking.create') }}" class="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition">Booking</a>
                 </div>
             </div>
         </section>

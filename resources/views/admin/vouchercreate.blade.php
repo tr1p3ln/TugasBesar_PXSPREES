@@ -1,34 +1,107 @@
 <x-layouts.admin>
-  <div class="content ml-52 p-5">
-    <!-- CREATE DATA FORM -->
-    <div class="form-container bg-white p-8 mt-5 rounded shadow">
-      <h5 class="text-lg font-semibold mb-5">Create Voucher</h5>
-      <form action="process_create.php" method="POST" enctype="multipart/form-data">
-        <div class="mb-4">
-          <label for="voucher" class="block text-sm font-medium text-gray-700 mb-1">Nama Voucher</label>
-          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded" id="voucher" name="voucher" required>
-        </div>
-        <div class="mb-4">
-          <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded" id="description" name="description" required>
-        </div>
-        <div class="mb-4">
-          <label for="point" class="block text-sm font-medium text-gray-700 mb-1">Point</label>
-          <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded" id="point" name="point" required min="0">
-        </div>
-        <div class="mb-4">
-          <label for="code" class="block text-sm font-medium text-gray-700 mb-1">Voucher Code</label>
-          <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded" id="code" name="code" required>
-        </div>
-        <div class="mb-4">
-          <label for="valid_date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Berlaku</label>
-          <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded" id="valid_date" name="valid_date" required>
-        </div>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="max-w-3xl mx-auto bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl shadow-purple-900/10 overflow-hidden">
+            <div class="p-6 sm:p-8">
+                <div class="mb-8 text-center">
+                    <h2 class="text-3xl font-bold text-white">Tambah Voucher Baru</h2>
+                    <p class="text-gray-400 mt-2">Isi detail di bawah untuk membuat voucher baru.</p>
+                </div>
 
-        <div class="text-right mt-5">
-          <button type="submit" class="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100">Save</button>
+                {{-- Menampilkan pesan error validasi --}}
+                @if ($errors->any())
+                    <div class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg mb-6" role="alert">
+                        <strong class="font-bold">Oops! Terjadi kesalahan.</strong>
+                        <ul class="mt-2 list-disc list-inside text-sm">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Form untuk membuat voucher baru --}}
+                <form action="{{ route('admin.vouchers.store') }}" method="POST" class="space-y-6">
+                    @csrf
+
+                    {{-- Nama Voucher --}}
+                    <div>
+                        <label for="nama_voucher" class="block text-sm font-medium text-gray-300 mb-2">Nama Voucher</label>
+                        <input type="text" name="nama_voucher" id="nama_voucher"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                            placeholder="Contoh: Diskon Akhir Tahun" value="{{ old('nama_voucher') }}" required>
+                    </div>
+
+                    {{-- Deskripsi --}}
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-300 mb-2">Deskripsi</label>
+                        <textarea name="description" id="description" rows="3"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                            placeholder="Jelaskan detail voucher ini..." required>{{ old('description') }}</textarea>
+                    </div>
+
+                    {{-- Grid untuk Point Dibutuhkan dan Jumlah Diskon --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="point_required" class="block text-sm font-medium text-gray-300 mb-2">Point Dibutuhkan</label>
+                            <input type="number" name="point_required" id="point_required"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                                placeholder="Contoh: 100" value="{{ old('point_required') }}" min="0" required>
+                        </div>
+                        <div>
+                            <label for="discount_amount" class="block text-sm font-medium text-gray-300 mb-2">Jumlah Diskon (Rp)</label>
+                            <input type="number" name="discount_amount" id="discount_amount" step="1" min="0"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                                placeholder="Contoh: 10000" value="{{ old('discount_amount') }}">
+                        </div>
+                    </div>
+
+                    {{-- Voucher Code --}}
+                    <div>
+                        <label for="voucher_code" class="block text-sm font-medium text-gray-300 mb-2">Kode Voucher</label>
+                        <input type="text" name="voucher_code" id="voucher_code"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                            placeholder="Contoh: VOUCHER50K" value="{{ old('voucher_code') }}" required>
+                    </div>
+
+                    {{-- Grid untuk Tanggal Mulai dan Tanggal Selesai --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="start_date" class="block text-sm font-medium text-gray-300 mb-2">Tanggal Mulai</label>
+                            <input type="date" name="start_date" id="start_date"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                                value="{{ old('start_date', date('Y-m-d')) }}" required>
+                        </div>
+                        <div>
+                            <label for="end_date" class="block text-sm font-medium text-gray-300 mb-2">Tanggal Selesai</label>
+                            <input type="date" name="end_date" id="end_date"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition placeholder-gray-400"
+                                value="{{ old('end_date') }}" min="{{ date('Y-m-d') }}" required>
+                        </div>
+                    </div>
+
+                    {{-- Status Aktif --}}
+                    <div>
+                        <label for="is_active" class="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                        <select name="is_active" id="is_active"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-700/50 text-white border-2 border-gray-600 focus:border-purple-500 focus:ring-purple-500 focus:outline-none transition" required>
+                            <option value="1" {{ old('is_active', '1') == '1' ? 'selected' : '' }}>Aktif</option>
+                            <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Tidak Aktif</option>
+                        </select>
+                    </div>
+
+                    {{-- Tombol Aksi --}}
+                    <div class="flex justify-end space-x-4 pt-4">
+                        <a href="{{ route('admin.vouchers.index') }}"
+                            class="px-8 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-300">
+                            Batal
+                        </a>
+                        <button type="submit"
+                            class="px-8 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300">
+                            Simpan Voucher
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-      </form>
     </div>
-  </div>
 </x-layouts.admin>

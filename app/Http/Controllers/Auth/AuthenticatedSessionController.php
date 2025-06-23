@@ -85,11 +85,11 @@ public function store(Request $request): RedirectResponse
 
     // Redirect berdasarkan role
     if ($user->role === 'admin') {
-        return redirect()->intended(route('admin.home'));
+        return redirect()->intended(route('admin.dashboard'));
     }
 
     // Jika bukan admin, redirect ke homepage user
-    return redirect()->intended(route('user.home'));
+    return redirect()->intended(route('user.dashboard'));
 }
 
 
@@ -154,7 +154,7 @@ public function store(Request $request): RedirectResponse
         $isFromAdmin = str_contains($request->headers->get('referer'), '/admin');
 
         return $isFromAdmin
-            ? redirect('/admin/login')
+            ? redirect('/login')
             : redirect('/login');
     }
 }

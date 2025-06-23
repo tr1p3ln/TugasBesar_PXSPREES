@@ -1,43 +1,39 @@
-<div class="sidebar fixed top-0 left-0 w-48 h-screen bg-gray-50 pt-5 border-r border-gray-300">
-    <div class="mb-8">
-        <div class="rounded-full bg-gray-200 mx-auto flex items-center justify-center w-14 h-14">Logo</div>
+<div class="sidebar fixed top-0 left-0 w-52 h-screen bg-gray-800 pt-5 border-r border-gray-700">
+    <div class="flex justify-center mb-5">
+        <div class="w-24 h-24 flex items-center justify-center bg-gray-700 rounded-full shadow-lg">
+            <x-application-logo class="w-full h-full" />
+        </div>
     </div>
 
-    {{-- Home --}}
-    <a href="{{ route('admin.homepage') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-home mr-2"></i> Home
-    </a>
+    <nav class="flex flex-col space-y-2 px-2">
+        {{-- Dashboard --}}
+        <a href="{{ route('admin.dashboard') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-home mr-3 w-5 text-center"></i> Dashboard
+        </a>
 
-    {{-- Kelola Data --}}
-    <a href="{{ route('admin.keloladata') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-database mr-2"></i> Data
-    </a>
+        {{-- Kelola Ruangan (Mengarah ke keloladata) --}}
+        <a href="{{ route('admin.keloladata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-person-booth mr-3 w-5 text-center"></i> Kelola Ruangan
+        </a>
+        
+        {{-- Kelola Voucher (Mengarah ke voucher) --}}
+        <a href="{{ route('admin.voucher') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-ticket-alt mr-3 w-5 text-center"></i> Kelola Voucher
+        </a>
 
-    {{-- Booking Data --}}
-    <a href="{{ route('admin.bookingdata') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-list mr-2"></i> Booking
-    </a>
+        {{-- Data Booking (Mengarah ke bookingdata) --}}
+        <a href="{{ route('admin.bookingdata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-list-alt mr-3 w-5 text-center"></i> Data Booking
+        </a>
+        
+        {{-- Konfirmasi Pembayaran (Mengarah ke payments.pending) --}}
+        <a href="{{ route('admin.payments.pending') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-check-circle mr-3 w-5 text-center"></i> Konfirmasi Bayar
+        </a>
 
-    {{-- History / Transaksi --}}
-    <a href="{{ route('admin.historydata') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-handshake mr-2"></i> Transaksi
-    </a>
-
-    {{-- Voucher --}}
-    <a href="{{ route('admin.voucher') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-ticket mr-2"></i> Voucher
-    </a>
-
-    {{-- Tambah Voucher --}}
-    <a href="{{ route('admin.vouchercreate') }}" class="sidebar-item block py-3 px-5 text-black font-medium hover:bg-gray-300">
-        <i class="fas fa-plus mr-2"></i> Tambah Voucher
-    </a>
-
-    {{-- Logout --}}
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="w-full text-left block py-3 px-5 text-black font-medium hover:bg-gray-300">
-            <i class="fas fa-sign-out-alt mr-2"></i> Logout
-        </button>
-    </form>
+        {{-- Riwayat Pembayaran (Mengarah ke historydata) --}}
+        <a href="{{ route('admin.historydata') }}" class="sidebar-item flex items-center py-3 px-4 text-white font-medium hover:bg-purple-600 transition duration-300 rounded-lg">
+            <i class="fas fa-history mr-3 w-5 text-center"></i> Riwayat Transaksi
+        </a>
+    </nav>
 </div>
